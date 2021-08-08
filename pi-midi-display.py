@@ -20,6 +20,8 @@
 # make sure root is added to the audio group for midi to work properly
 # $ sudo usermod -a -G audio root
 #
+# TODO: Add ability to keep track of held notes by counting ons and offs
+#
 
 import sys
 import time
@@ -84,6 +86,9 @@ class PiMidiDisplay():
     options.cols = self.led_cols
     options.hardware_mapping = self.hardware
     options.brightness = self.brightness
+    # fixes panel ghosting issues Range 100-300 Default=130
+    # increase until you don't see ghosting anymore
+    options.pwm_lsb_nanoseconds = 130
 
     self.matrix = RGBMatrix(options = options)
 

@@ -34,8 +34,12 @@ After each MIDI event highlight the current note coordinates with the appropriat
 - libjack-dev
 
 ## Installation
->TODO: Create a simple installation script to add a dependencies to a new installation
+>TODO: Create a simple installation script to add a dependencies to a new installation, something like the following
 
+```
+curl https://raw.githubusercontent.com/creativecontrol/pi-midi-display/main/install-remote.sh > install-pi-midi-display.sh
+sudo bash install-pi-midi-display.sh
+```
 MIDI libs installation notes:
 ```
 sudo pip3 install mido

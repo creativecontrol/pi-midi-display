@@ -20,8 +20,6 @@
 # make sure root is added to the audio group for midi to work properly
 # $ sudo usermod -a -G audio root
 #
-# TODO: Add ability to keep track of held notes by counting ons and offs
-#
 
 import sys
 import time
@@ -96,7 +94,7 @@ class PiMidiDisplay():
     # self.row_map = [119, 112, 105, 98, 91, 84, 77, 70, 63, 56, 49, 42, 35, 28, 21, 14]
     self.row_map = []
 
-    self.current_notes = []
+    self.current_notes = {}  # {'note': <qty: int>}
 
   def build_row_map(self):
     map = []
@@ -125,13 +123,16 @@ class PiMidiDisplay():
       
 
   def handle_note_on(self, msg):
-    if (msg.note not in self.current_notes):
-      self.current_notes.append(msg.note)
-      self.update_pixels()
+    if (msg.note in self.current_notes):
+      self.current_notes[msg.note] +=1
+    else: 
+      self.current_notes[msg.note] = 1
+    self.update_pixels()
 
   def handle_note_off(self, msg):
     if (msg.note in self.current_notes):
-      self.current_notes.remove(msg.note)
+      if self.current_notes[msg.note] > 0:
+        self.current_notes[msg.note] -= 1
       self.update_pixels()
 
   def hex_to_rgb(self, value: str) -> tuple:
@@ -158,11 +159,12 @@ class PiMidiDisplay():
   def update_pixels(self):
     self.offset_canvas.Clear()
     for note in self.current_notes:
-      pixels = self.where_in_rows(note)
-      note_color = self.hex_to_rgb(self.colors[self.midi_to_pitch_class(note)])
+      if self.current_notes[note] > 0:
+        pixels = self.where_in_rows(note)
+        note_color = self.hex_to_rgb(self.colors[self.midi_to_pitch_class(note)])
 
-      for pixel in pixels: 
-        self.offset_canvas.SetPixel(pixel['x'], pixel['y'], note_color[0], note_color[1], note_color[2])
+        for pixel in pixels: 
+          self.offset_canvas.SetPixel(pixel['x'], pixel['y'], note_color[0], note_color[1], note_color[2])
 
     self.offset_canvas = self.matrix.SwapOnVSync(self.offset_canvas)
     
